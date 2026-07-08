@@ -1,0 +1,10 @@
+langgraph
+langgraph-checkpoint-sqlite
+langchain-groq
+python-dotenv
+pydantic
+pytest
+fastapi
+uvicorn
+streamlit
+requests
