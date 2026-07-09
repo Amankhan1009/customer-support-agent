@@ -1,16 +1,32 @@
 # Customer Support Agent with LangGraph
 
-A modular, stateful, and containerized Agentic AI customer support system built with LangGraph.
+A modular, stateful, containerized, and publicly deployed Agentic AI customer support system built with LangGraph.
 
-The application demonstrates hybrid intent routing, specialized subgraphs, persistent conversation state, context-aware LLM fallback routing, conditional workflows, error handling, human escalation, real human-in-the-loop execution, REST API integration, an interactive Streamlit interface, automated testing, and multi-platform Docker deployment.
+The application demonstrates hybrid intent routing, specialized LangGraph subgraphs, persistent conversation state, context-aware LLM fallback routing, conditional workflows, error handling, human escalation, real human-in-the-loop execution, REST API integration, an interactive Streamlit interface, automated testing, configurable checkpoint backends, production PostgreSQL persistence, multi-platform Docker deployment, and public cloud deployment.
+
+## Live Deployment
+
+### Streamlit Application
+
+https://customer-support-agent-frontend.onrender.com
+
+### FastAPI Backend
+
+https://customer-support-agent-4960.onrender.com
+
+### Swagger API Documentation
+
+https://customer-support-agent-4960.onrender.com/docs
+
+> The application is deployed using Render free-tier services. Free services may spin down after inactivity, so the first request can take additional time while the service starts.
 
 ## Repository and Docker Images
 
-**GitHub Repository**
+### GitHub Repository
 
 https://github.com/Amankhan1009/customer-support-agent
 
-**Docker Hub Images**
+### Docker Hub Images
 
 API:
 
@@ -31,106 +47,113 @@ Docker automatically selects the correct image variant for the host architecture
 
 ## Features
 
-* Natural-language customer support queries
-* Hybrid deterministic and LLM-based intent routing
-* Deterministic classification for clear customer requests
-* Context-aware LLM fallback routing for ambiguous requests
-* Structured LLM output for reliable intent classification
-* Conditional routing using LangGraph
-* Specialized Billing, Technical, Account, and General support subgraphs
-* Shared LangGraph state across workflows
-* SQLite checkpoint persistence
-* Persistent conversation message history
-* Human escalation for unresolved and sensitive requests
-* Real human-in-the-loop execution using `interrupt()`
-* Resume paused workflows using `Command(resume=...)`
-* Persistent interrupted workflows across application restarts
-* FastAPI REST API
-* Interactive Streamlit chat interface
-* Human-review interface for interrupted workflows
-* Conversation thread isolation using `thread_id`
-* Unit, workflow, and API integration tests
-* Environment-based configuration
-* Application logging
-* Dockerized API and frontend services
-* Docker Compose orchestration
-* Persistent Docker volume for SQLite checkpoints
-* Multi-platform Docker images for AMD64 and ARM64 systems
+- Natural-language customer support queries
+- Hybrid deterministic and LLM-based intent routing
+- Deterministic classification for clear customer requests
+- Context-aware LLM fallback routing for ambiguous requests
+- Structured LLM output for reliable intent classification
+- Conditional routing using LangGraph
+- Specialized Billing, Technical, Account, and General support subgraphs
+- Shared LangGraph state across workflows
+- Configurable SQLite and PostgreSQL checkpoint backends
+- SQLite checkpoint persistence for local development
+- PostgreSQL checkpoint persistence for production deployment
+- Persistent conversation and workflow state
+- Human escalation for unresolved and sensitive requests
+- Real human-in-the-loop execution using `interrupt()`
+- Resume paused workflows using `Command(resume=...)`
+- Persistent interrupted workflows across application and container restarts
+- Conversation state recovery after API redeployment or restart
+- FastAPI REST API
+- Interactive Streamlit chat interface
+- Human-review interface for interrupted workflows
+- Conversation thread isolation using `thread_id`
+- Unit, workflow, and API integration tests
+- Environment-based configuration
+- Application logging
+- Dockerized API and frontend services
+- Docker Compose orchestration
+- Multi-platform Docker images for AMD64 and ARM64 systems
+- Public cloud deployment using Render
+- Managed PostgreSQL persistence using Neon
 
-## Architecture
+## High-Level Architecture
 
 ```text
-                            Customer
-                               |
-                               v
-                       Streamlit Chat UI
-                            :8501
-                               |
-                          HTTP Requests
-                               |
-                               v
-                         FastAPI Backend
-                            :8000
-                               |
-                               v
+                              Customer
+                                 |
+                                 v
+                     Streamlit Frontend Service
+                         Render Web Service
+                                 |
+                                 | HTTPS
+                                 v
+                       FastAPI Backend Service
+                         Render Web Service
+                                 |
+                                 v
                        LangGraph Parent Graph
-                               |
-                               v
-                         Receive Query
-                               |
-                               v
-                 Deterministic Intent Classifier
-                               |
-                    +----------+----------+
-                    |                     |
-               Clear Intent         Ambiguous Intent
-                    |                     |
-                    |                     v
-                    |          Context-Aware LLM Classifier
-                    |                     |
-                    +----------+----------+
-                               |
-                               v
-                      Conditional Routing
-                               |
-             +-----------------+-----------------+
-             |                 |                 |
-             v                 v                 v
-      Billing Subgraph  Technical Subgraph  Account Subgraph
-             |
-             +--------------------------+
-                                        |
-                                        v
-                                 General Subgraph
+                                 |
+                                 v
+                           Receive Query
+                                 |
+                                 v
+                   Deterministic Intent Classifier
+                                 |
+                      +----------+----------+
+                      |                     |
+                 Clear Intent         Ambiguous Intent
+                      |                     |
+                      |                     v
+                      |          Context-Aware LLM Classifier
+                      |                     |
+                      +----------+----------+
+                                 |
+                                 v
+                        Conditional Routing
+                                 |
+              +------------------+------------------+
+              |                  |                  |
+              v                  v                  v
+       Billing Subgraph   Technical Subgraph   Account Subgraph
+              |
+              +--------------------------+
+                                         |
+                                         v
+                                  General Subgraph
+                                         |
+                                         v
+                              Resolution / Escalation
+                                         |
+                               +---------+---------+
+                               |                   |
+                            Resolved           Escalation
+                               |                   |
+                               v                   v
+                       Final Response      Human Support Node
+                                                   |
+                                                   v
+                                              interrupt()
+                                                   |
+                                                   v
+                                      PostgreSQL Checkpoint Saved
+                                                   |
+                                                   v
+                                         Human Support Review
+                                                   |
+                                                   v
+                                      Command(resume=response)
+                                                   |
+                                                   v
+                                           Graph Resumes
+                                                   |
+                                                   v
+                                            Final Response
 
-                               |
-                               v
-                    Resolution / Escalation Decision
-                               |
-                      +--------+--------+
-                      |                 |
-                   Resolved         Escalation
-                      |                 |
-                      v                 v
-             Finalize Response   Human Support Workflow
-                                        |
-                                        v
-                                    interrupt()
-                                        |
-                                        v
-                              SQLite Checkpoint Saved
-                                        |
-                                        v
-                              Human Support Review
-                                        |
-                                        v
-                            Command(resume=response)
-                                        |
-                                        v
-                                 Graph Resumes
-                                        |
-                                        v
-                              Finalize Response
+                                 |
+                                 v
+                         Neon PostgreSQL
+                    Persistent LangGraph Checkpoints
 ```
 
 ## Application Architecture
@@ -143,28 +166,81 @@ Browser
    v
 Streamlit Frontend
    |
-   | HTTP
+   | HTTPS / REST
    v
-FastAPI REST API
+FastAPI Backend
    |
    v
 LangGraph Application
    |
-   +---------------------------+
-   |                           |
-   v                           v
-Specialized Subgraphs    Human-in-the-Loop
-   |                           |
-   v                           v
+   +----------------------------+
+   |                            |
+   v                            v
+Specialized Subgraphs     Human-in-the-Loop
+   |                            |
+   v                            v
 Support Resolution       interrupt() / resume
-   |
-   v
-SQLite Checkpointer
+                                |
+                                v
+                       Configurable Checkpointer
+                                |
+                     +----------+----------+
+                     |                     |
+                     v                     v
+                  SQLite              PostgreSQL
+             Local Development     Production Deployment
+                                          |
+                                          v
+                                  Neon PostgreSQL
 ```
 
 The Streamlit frontend acts as a thin API client and never directly invokes the LangGraph application.
 
 This separation allows the backend agent system to be consumed by other clients without changing the graph implementation.
+
+## Production Deployment Architecture
+
+The publicly deployed application uses separate frontend and backend services.
+
+```text
+                           Internet
+                              |
+                              v
+                   Streamlit Frontend
+                        Render
+                              |
+                              | HTTPS
+                              v
+                     FastAPI REST API
+                        Render
+                              |
+                              v
+                     LangGraph Workflows
+                              |
+                              v
+                 PostgreSQL LangGraph Saver
+                              |
+                              | TLS Connection
+                              v
+                      Neon PostgreSQL
+                              |
+                              v
+               Persistent Workflow Checkpoints
+```
+
+### Production Components
+
+| Component | Technology | Responsibility |
+|---|---|---|
+| Frontend | Streamlit on Render | Customer chat interface and human-review UI |
+| Backend | FastAPI on Render | REST API and LangGraph execution |
+| Agent Orchestration | LangGraph | Stateful workflow execution and routing |
+| LLM | Groq API | Ambiguous intent classification |
+| Production Persistence | Neon PostgreSQL | Durable LangGraph checkpoints |
+| Local Persistence | SQLite | Lightweight local checkpoint backend |
+| Containers | Docker | Reproducible application packaging |
+| Container Registry | Docker Hub | Published multi-platform images |
+| Testing | Pytest | Classifier, workflow, HITL, and API verification |
 
 ## Routing Strategy
 
@@ -192,11 +268,11 @@ Examples:
 
 Deterministic routing provides:
 
-* Low latency
-* Predictable behavior
-* Reduced LLM API usage
-* Lower inference cost
-* Easy automated testing
+- Low latency
+- Predictable behavior
+- Reduced LLM API usage
+- Lower inference cost
+- Easy automated testing
 
 ### Context-Aware LLM Fallback Routing
 
@@ -204,13 +280,11 @@ When deterministic classification cannot confidently identify an intent, the req
 
 The classifier uses structured output and returns exactly one supported intent:
 
-* `billing`
-* `technical`
-* `account`
-* `general`
-* `unknown`
-
-Example:
+- `billing`
+- `technical`
+- `account`
+- `general`
+- `unknown`
 
 ```text
 Customer Message
@@ -252,10 +326,10 @@ Each major support domain is implemented as an independent LangGraph subgraph.
 
 Handles:
 
-* Duplicate charges
-* Refund requests
-* Payment failures
-* Other billing-related requests
+- Duplicate charges
+- Refund requests
+- Payment failures
+- Other billing-related requests
 
 The workflow classifies the billing issue and conditionally routes execution to the appropriate billing handler.
 
@@ -263,10 +337,10 @@ The workflow classifies the billing issue and conditionally routes execution to 
 
 Handles:
 
-* Application errors
-* Performance issues
-* Feature issues
-* Unsupported technical problems
+- Application errors
+- Performance issues
+- Feature issues
+- Unsupported technical problems
 
 The workflow performs issue classification, technical diagnosis, and resolution-status routing.
 
@@ -276,11 +350,11 @@ Unresolved technical issues are escalated to the parent graph's human-support wo
 
 Handles:
 
-* Login problems
-* Password resets
-* Unauthorized account access
-* Account deletion
-* Other account-management requests
+- Login problems
+- Password resets
+- Unauthorized account access
+- Account deletion
+- Other account-management requests
 
 Sensitive account requests are escalated for human review.
 
@@ -288,9 +362,9 @@ Sensitive account requests are escalated for human review.
 
 Handles:
 
-* Pricing questions
-* Product questions
-* General service questions
+- Pricing questions
+- Product questions
+- General service questions
 
 ## Human-in-the-Loop Execution
 
@@ -317,10 +391,13 @@ interrupt()
 Graph Execution Pauses
        |
        v
-SQLite Checkpoint Saved
+Checkpoint Persisted
        |
        v
 API Returns human_review_required
+       |
+       v
+Streamlit Displays Escalation Details
        |
        v
 Human Reviews Request
@@ -341,35 +418,189 @@ Graph Execution Continues
 Final Response
 ```
 
-Because execution state is persisted using SQLite checkpointing, interrupted workflows can survive application restarts.
+The workflow does not restart from the beginning after human review.
 
-## Persistence and Conversation Context
+LangGraph resumes execution from the persisted checkpoint.
 
-LangGraph checkpointing is implemented using SQLite.
+With the PostgreSQL backend, interrupted and completed workflows survive API container restarts and service redeployments.
 
-Each conversation is identified by a unique `thread_id`.
+## Persistence Architecture
+
+The application supports configurable checkpoint backends.
+
+The active backend is selected using:
+
+```text
+CHECKPOINTER_BACKEND
+```
+
+Supported values:
+
+```text
+sqlite
+postgres
+```
+
+### SQLite Backend
+
+SQLite is used for lightweight local development.
+
+```text
+LangGraph
+    |
+    v
+SqliteSaver
+    |
+    v
+support_checkpoints.db
+```
+
+Benefits:
+
+- No external database required
+- Easy local development
+- Simple debugging
+- Persistent state across local application restarts
+
+### PostgreSQL Backend
+
+PostgreSQL is used for production deployment.
+
+```text
+LangGraph
+    |
+    v
+PostgresSaver
+    |
+    v
+Neon PostgreSQL
+```
+
+Benefits:
+
+- Durable external persistence
+- Workflow state survives container restarts
+- Suitable for ephemeral cloud containers
+- Centralized checkpoint storage
+- Better foundation for production deployment
+
+### Checkpointer Factory
+
+Checkpointer creation is centralized in:
+
+```text
+config/checkpointer.py
+```
+
+The application selects the backend from environment configuration rather than hard-coding persistence logic inside the API layer.
+
+Conceptually:
+
+```text
+Application Startup
+       |
+       v
+Read CHECKPOINTER_BACKEND
+       |
+       +----------------+
+       |                |
+       v                v
+    sqlite           postgres
+       |                |
+       v                v
+SqliteSaver      PostgresSaver
+       |                |
+       +--------+-------+
+                |
+                v
+         Compile LangGraph
+```
+
+This keeps the graph implementation independent from the persistence infrastructure.
+
+## Production Persistence Verification
+
+Production checkpoint persistence was verified against the deployed Render API and Neon PostgreSQL database.
+
+The verification flow:
+
+```text
+Submit Technical Request
+          |
+          v
+Technical Workflow Cannot Resolve Issue
+          |
+          v
+LangGraph interrupt()
+          |
+          v
+API Returns human_review_required
+          |
+          v
+Checkpoint Persisted in Neon PostgreSQL
+          |
+          v
+Retrieve Thread Status
+          |
+          v
+Human Review Submitted
+          |
+          v
+Command(resume=...)
+          |
+          v
+Workflow Completes
+          |
+          v
+Restart API Service
+          |
+          v
+Retrieve Same thread_id
+          |
+          v
+Completed State Successfully Recovered
+```
+
+Verified production response after API service restart:
+
+```json
+{
+  "thread_id": "customer-32211228",
+  "status": "completed",
+  "response": "A human support engineer reviewed the issue and will investigate it further.",
+  "interrupt_data": null
+}
+```
+
+This confirms that workflow state is persisted externally and is not tied to the lifecycle of the Render container.
+
+## Conversation Threads
+
+Each conversation is identified using a unique `thread_id`.
+
+Example:
 
 ```text
 customer-a1b2c3d4
         |
         v
-Conversation History + Graph Checkpoints
+Conversation State + Graph Checkpoints
 
 customer-x9y8z7w6
         |
         v
-Independent Conversation History + Graph Checkpoints
+Independent Conversation State + Graph Checkpoints
 ```
 
 The shared LangGraph state stores conversation messages using the `add_messages` reducer.
 
-Conversation context is provided to the LLM fallback classifier when deterministic routing cannot confidently determine the latest customer intent.
+Conversation context can be provided to the LLM fallback classifier when deterministic routing cannot confidently determine the latest customer intent.
 
 Starting a new conversation from the Streamlit UI:
 
-* Creates a new thread ID
-* Clears visible messages from the current Streamlit session
-* Does not delete existing SQLite checkpoints
+- Creates a new thread ID
+- Clears visible messages from the current Streamlit session
+- Does not delete previously persisted checkpoints
 
 ## Streamlit User Interface
 
@@ -378,7 +609,7 @@ The project includes an interactive Streamlit frontend.
 ```text
 Streamlit UI
       |
-      | HTTP Requests
+      | HTTP / HTTPS
       v
 FastAPI
       |
@@ -392,15 +623,16 @@ It does not directly import or invoke the LangGraph application.
 
 ### UI Features
 
-* Chat-based customer support interface
-* Automatically generated conversation thread IDs
-* Visible customer and support messages
-* Start New Conversation button
-* Human-review-required status
-* Escalation details
-* Human support response input
-* Resume interrupted workflows
-* Configurable backend API URL
+- Chat-based customer support interface
+- Automatically generated conversation thread IDs
+- Visible customer and support messages
+- Start New Conversation button
+- Human-review-required status
+- Escalation details
+- Human support response input
+- Resume interrupted workflows
+- Configurable backend API URL
+- Public cloud deployment
 
 ## REST API
 
@@ -449,7 +681,8 @@ Human-review response:
     "type": "human_support_review",
     "customer_message": "I have a strange technical problem.",
     "intent": "technical",
-    "escalation_reason": "automatic_diagnosis_failed"
+    "escalation_reason": "automatic_diagnosis_failed",
+    "diagnostic_result": "The technical issue could not be diagnosed automatically."
   }
 }
 ```
@@ -485,6 +718,7 @@ customer-support-agent/
 │   └── schemas.py
 ├── config/
 │   ├── __init__.py
+│   ├── checkpointer.py
 │   ├── llm.py
 │   ├── logging.py
 │   └── settings.py
@@ -562,15 +796,35 @@ Create `.env` from the provided template:
 cp .env.example .env
 ```
 
-Configure:
+### Local SQLite Configuration
 
 ```text
 GROQ_API_KEY=your_real_groq_api_key
+
+CHECKPOINTER_BACKEND=sqlite
+
 DATABASE_PATH=support_checkpoints.db
+
+DATABASE_URL=
+
 LOG_LEVEL=INFO
 ```
 
-Never commit the real `.env` file.
+### PostgreSQL Configuration
+
+```text
+GROQ_API_KEY=your_real_groq_api_key
+
+CHECKPOINTER_BACKEND=postgres
+
+DATABASE_PATH=support_checkpoints.db
+
+DATABASE_URL=your_postgresql_connection_string
+
+LOG_LEVEL=INFO
+```
+
+Never commit the real `.env` file or expose API keys and database credentials.
 
 ## Local Installation
 
@@ -613,7 +867,7 @@ Create and configure `.env`:
 cp .env.example .env
 ```
 
-Then add your Groq API key to `.env`.
+Add your Groq API key and select the desired checkpoint backend.
 
 ## Run the CLI Application
 
@@ -627,7 +881,11 @@ python app.py
 uvicorn api.main:app --reload
 ```
 
-The backend is available on port `8000`.
+The backend is available at:
+
+```text
+http://127.0.0.1:8000
+```
 
 Swagger API documentation:
 
@@ -645,7 +903,7 @@ Open another terminal:
 streamlit run frontend/app.py
 ```
 
-The frontend is available on port `8501`.
+The frontend is available at:
 
 ```text
 http://localhost:8501
@@ -653,15 +911,13 @@ http://localhost:8501
 
 ## Run with Docker Compose
 
-The easiest way to run the complete application is Docker Compose.
-
 Create `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-Add your Groq API key.
+Configure the required environment variables.
 
 Start both services:
 
@@ -683,17 +939,37 @@ Stop the application:
 docker compose down
 ```
 
-The SQLite checkpoint database is persisted using the `support_data` Docker volume.
+### Docker Compose with SQLite
 
-To also delete the persisted checkpoint volume:
+Set:
+
+```text
+CHECKPOINTER_BACKEND=sqlite
+DATABASE_PATH=/data/support_checkpoints.db
+```
+
+SQLite checkpoints are persisted using the `support_data` Docker volume.
+
+To delete the persisted SQLite checkpoint volume:
 
 ```bash
 docker compose down -v
 ```
 
-## Run Using Published Docker Images
+### Docker Compose with PostgreSQL
 
-The API and frontend images are published on Docker Hub.
+Set:
+
+```text
+CHECKPOINTER_BACKEND=postgres
+DATABASE_URL=your_postgresql_connection_string
+```
+
+The API container connects to the configured PostgreSQL database.
+
+Checkpoint state is stored externally and survives container recreation.
+
+## Run Using Published Docker Images
 
 Pull the images:
 
@@ -703,7 +979,7 @@ docker pull amankhan1009/customer-support-agent-api:latest
 docker pull amankhan1009/customer-support-agent-frontend:latest
 ```
 
-The images support both:
+The images support:
 
 ```text
 linux/amd64
@@ -712,13 +988,13 @@ linux/arm64
 
 Docker automatically selects the appropriate image for the host architecture.
 
-To run the complete system using the published images, the services must share a Docker network so the frontend can communicate with the API.
-
 Create a network:
 
 ```bash
 docker network create customer-support-network
 ```
+
+### Run the API with SQLite
 
 Create a persistent volume:
 
@@ -734,12 +1010,26 @@ docker run -d \
   --network customer-support-network \
   -p 8000:8000 \
   -e GROQ_API_KEY=your_real_groq_api_key \
+  -e CHECKPOINTER_BACKEND=sqlite \
   -e DATABASE_PATH=/data/support_checkpoints.db \
   -v customer-support-data:/data \
   amankhan1009/customer-support-agent-api:latest
 ```
 
-Run the frontend:
+### Run the API with PostgreSQL
+
+```bash
+docker run -d \
+  --name customer-support-api \
+  --network customer-support-network \
+  -p 8000:8000 \
+  -e GROQ_API_KEY=your_real_groq_api_key \
+  -e CHECKPOINTER_BACKEND=postgres \
+  -e DATABASE_URL=your_postgresql_connection_string \
+  amankhan1009/customer-support-agent-api:latest
+```
+
+### Run the Frontend
 
 ```bash
 docker run -d \
@@ -756,13 +1046,58 @@ Open:
 http://localhost:8501
 ```
 
-Stop and remove the containers:
+Stop and remove containers:
 
 ```bash
 docker stop customer-support-frontend customer-support-api
 
 docker rm customer-support-frontend customer-support-api
 ```
+
+## Public Cloud Deployment
+
+The application is publicly deployed using Render.
+
+### Backend Service
+
+The FastAPI backend runs as a Docker-based Render Web Service.
+
+Production configuration:
+
+```text
+CHECKPOINTER_BACKEND=postgres
+DATABASE_URL=<Neon PostgreSQL connection string>
+GROQ_API_KEY=<Groq API key>
+LOG_LEVEL=INFO
+```
+
+Health check:
+
+```text
+/health
+```
+
+The backend binds to the port provided by the Render `PORT` environment variable.
+
+### Frontend Service
+
+The Streamlit frontend runs as a separate Docker-based Render Web Service.
+
+Configuration:
+
+```text
+API_URL=https://customer-support-agent-4960.onrender.com
+```
+
+The frontend communicates with the deployed backend over HTTPS.
+
+### Production Database
+
+Neon PostgreSQL is used as the external production checkpoint store.
+
+This is necessary because Render free-tier containers use ephemeral local filesystems and do not provide persistent disks.
+
+Using external PostgreSQL persistence ensures LangGraph checkpoints survive API container restarts and redeployments.
 
 ## Run Tests
 
@@ -772,17 +1107,18 @@ pytest -v
 
 The project currently includes 20 automated tests covering:
 
-* Deterministic classifiers
-* Billing workflow execution
-* Technical workflow execution
-* Account workflow execution
-* General workflow execution
-* Escalation decisions
-* FastAPI endpoints
-* Conversation status retrieval
-* Human-in-the-loop interruption
-* Workflow resume behavior
-* API conflict and not-found responses
+- Deterministic classifiers
+- Billing workflow execution
+- Technical workflow execution
+- Account workflow execution
+- General workflow execution
+- Escalation decisions
+- FastAPI endpoints
+- Conversation status retrieval
+- Human-in-the-loop interruption
+- Workflow resume behavior
+- API conflict responses
+- API not-found responses
 
 Current test status:
 
@@ -794,42 +1130,47 @@ Current test status:
 
 ### Agent Orchestration
 
-* LangGraph
-* LangChain
+- LangGraph
+- LangChain
 
 ### LLM Integration
 
-* Groq LLM API
-* GPT-OSS 120B
-* Structured Output
+- Groq LLM API
+- GPT-OSS 120B
+- Structured Output
 
 ### Backend
 
-* FastAPI
-* Uvicorn
-* Pydantic
+- FastAPI
+- Uvicorn
+- Pydantic
 
 ### Persistence
 
-* SQLite
-* LangGraph SQLite Checkpointer
+- SQLite
+- PostgreSQL
+- Neon
+- LangGraph SQLite Checkpointer
+- LangGraph PostgreSQL Checkpointer
 
 ### Frontend
 
-* Streamlit
-* Requests
+- Streamlit
+- Requests
 
 ### Testing
 
-* Pytest
-* FastAPI TestClient
+- Pytest
+- FastAPI TestClient
 
-### Infrastructure
+### Infrastructure and Deployment
 
-* Docker
-* Docker Compose
-* Docker Buildx
-* Multi-platform OCI images
+- Docker
+- Docker Compose
+- Docker Buildx
+- Multi-platform OCI images
+- Docker Hub
+- Render
 
 ## Docker Image Architecture Support
 
@@ -852,11 +1193,11 @@ customer-support-agent-frontend:latest
 
 This allows the application to run natively on:
 
-* Intel/AMD Linux systems
-* Windows systems using Linux containers
-* Intel-based Macs
-* Apple Silicon Macs
-* ARM64 Linux systems
+- Intel/AMD Linux systems
+- Windows systems using Linux containers
+- Intel-based Macs
+- Apple Silicon Macs
+- ARM64 Linux systems
 
 ## Engineering Decisions
 
@@ -882,11 +1223,29 @@ It does not directly invoke LangGraph.
 
 This keeps the agent orchestration layer independent of the UI implementation.
 
+### Configurable Persistence Backend
+
+Persistence configuration is separated from graph construction and API request handling.
+
+SQLite provides a lightweight development backend, while PostgreSQL provides durable external persistence for cloud deployment.
+
+This avoids coupling the LangGraph application to one storage implementation.
+
 ### Persistent Human-in-the-Loop Execution
 
-LangGraph checkpoints and SQLite persistence allow interrupted workflows to survive application restarts.
+LangGraph checkpoints allow interrupted workflows to survive application restarts.
 
-Human responses resume execution from the saved graph state rather than restarting the workflow.
+Human responses resume execution from saved graph state rather than restarting the workflow.
+
+Production PostgreSQL checkpointing ensures workflow state remains available even when the API container is restarted or redeployed.
+
+### External Persistence for Ephemeral Containers
+
+The deployed backend does not rely on the Render container filesystem for production checkpoint persistence.
+
+Neon PostgreSQL stores workflow state externally.
+
+This allows state recovery independently of the lifecycle of the application container.
 
 ### Multi-Platform Container Images
 
@@ -894,51 +1253,106 @@ Separate AMD64 and ARM64 image variants are published behind a single `latest` m
 
 Docker automatically selects the correct image variant for the host platform.
 
+## Production Verification
+
+The deployed system was tested end-to-end.
+
+Verified behaviors:
+
+- Public Streamlit frontend successfully communicates with the deployed FastAPI API
+- Health endpoint returns a successful response
+- Deterministic routing processes clear customer requests
+- Human-review-required workflows pause using `interrupt()`
+- Escalation metadata is displayed in the Streamlit UI
+- Human responses resume execution using `Command(resume=...)`
+- Completed workflow state is persisted in PostgreSQL
+- Conversation status can be retrieved using `thread_id`
+- Checkpoint state survives API service restart
+- Completed conversations are successfully recovered from Neon PostgreSQL after container restart
+
 ## Current Limitations
 
-This project is designed to demonstrate Agentic AI architecture and LangGraph workflow orchestration.
+This project is designed to demonstrate Agentic AI architecture, LangGraph workflow orchestration, HITL execution, persistence, containerization, and cloud deployment.
 
 Current limitations:
 
-* Deterministic classifiers use keyword matching rather than production intent-classification models.
-* Domain subgraphs do not independently resolve ambiguous follow-up requests using conversation history.
-* SQLite is suitable for local development but not ideal for horizontally scaled production deployments.
-* Human review is implemented through the Streamlit interface instead of a dedicated authenticated support dashboard.
-* Conversation checkpoints remain stored after starting a new conversation.
-* Authentication and authorization are not implemented.
-* Rate limiting is not implemented.
-* Distributed tracing and production observability are not implemented.
-* The Streamlit UI stores visible messages in session state instead of loading complete conversation history from the backend.
+- Deterministic classifiers use keyword matching rather than trained production intent-classification models.
+- Domain subgraphs do not independently resolve all ambiguous follow-up requests using conversation history.
+- The application does not provide an authenticated support-agent dashboard.
+- Authentication and authorization are not implemented.
+- Rate limiting is not implemented.
+- Distributed tracing and production observability are not implemented.
+- The Streamlit UI stores visible messages in session state instead of reconstructing complete conversation history from the backend.
+- Starting a new conversation does not delete previously persisted checkpoints.
+- Human-review operations are not protected by role-based access control.
+- Render free-tier services may experience cold-start latency after periods of inactivity.
+- The application is deployed as a single backend instance and does not demonstrate horizontal scaling.
 
 ## Learning Goals Demonstrated
 
 This project demonstrates practical understanding of:
 
-* LangGraph state management
-* Nodes and edges
-* Conditional routing
-* Routing functions
-* Deterministic workflows
-* LLM-based fallback routing
-* Structured output
-* Specialized subgraphs
-* Shared graph state
-* Persistence and checkpointing
-* Conversation history
-* Context-aware routing
-* Error handling
-* Escalation workflows
-* Human-in-the-loop execution
-* `interrupt()`
-* `Command(resume=...)`
-* FastAPI integration
-* REST API design
-* Streamlit frontend integration
-* Automated testing
-* Separation of concerns
-* Environment-based configuration
-* Application logging
-* Docker containerization
-* Docker Compose orchestration
-* Persistent Docker volumes
-* Multi-platform Docker image publishing
+- LangGraph state management
+- Nodes and edges
+- Conditional routing
+- Routing functions
+- Deterministic workflows
+- LLM-based fallback routing
+- Structured output
+- Specialized subgraphs
+- Shared graph state
+- Persistence and checkpointing
+- Configurable checkpoint backends
+- SQLite checkpoint persistence
+- PostgreSQL checkpoint persistence
+- Conversation history
+- Context-aware routing
+- Error handling
+- Escalation workflows
+- Human-in-the-loop execution
+- `interrupt()`
+- `Command(resume=...)`
+- Workflow state recovery
+- FastAPI integration
+- REST API design
+- Streamlit frontend integration
+- Automated testing
+- Separation of concerns
+- Environment-based configuration
+- Application logging
+- Docker containerization
+- Docker Compose orchestration
+- Persistent external state
+- Multi-platform Docker image publishing
+- Public cloud deployment
+- Ephemeral container architecture
+- Managed PostgreSQL integration
+
+## Future Improvements
+
+Potential future improvements include:
+
+- Authenticated customer and support-agent accounts
+- Role-based access control for human-review operations
+- Dedicated human-support dashboard
+- Complete conversation-history reconstruction from persisted state
+- Production-grade intent classification
+- Additional specialized support workflows
+- Rate limiting
+- Request authentication
+- Distributed tracing
+- Metrics and monitoring
+- Structured observability dashboards
+- Automated CI/CD deployment pipeline
+- Horizontal scaling and concurrency testing
+- PostgreSQL connection-pool tuning
+- Database migration management
+- Automated production health and smoke tests
+
+## Author
+
+**Md Aman Alam**
+
+GitHub:
+
+https://github.com/Amankhan1009
