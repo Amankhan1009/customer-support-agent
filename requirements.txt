@@ -1,5 +1,6 @@
 langgraph
 langgraph-checkpoint-sqlite
+langgraph-checkpoint-postgres
 langchain-groq
 python-dotenv
 pydantic
@@ -8,3 +9,4 @@ fastapi
 uvicorn
 streamlit
 requests
+psycopg[binary,pool]

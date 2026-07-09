@@ -1,8 +1,6 @@
-import sqlite3
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
-from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.types import Command
 
 from api.schemas import (
@@ -10,28 +8,29 @@ from api.schemas import (
     SupportRequest,
     SupportResponse,
 )
+from config.checkpointer import (
+    close_checkpointer,
+    create_checkpointer,
+)
+from config.logging import configure_logging
 from graph.builder import build_graph
 
 
-from config.logging import configure_logging
-from config.settings import DATABASE_PATH
-
 configure_logging()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    connection = sqlite3.connect(
-        DATABASE_PATH,
-        check_same_thread=False,
-    )
+    checkpointer, resource = create_checkpointer()
 
-    checkpointer = SqliteSaver(connection)
-    app.state.graph = build_graph(checkpointer=checkpointer)
-    app.state.connection = connection
+    app.state.graph = build_graph(
+        checkpointer=checkpointer,
+    )
+    app.state.checkpointer_resource = resource
 
     yield
 
-    connection.close()
+    close_checkpointer(resource)
 
 
 app = FastAPI(

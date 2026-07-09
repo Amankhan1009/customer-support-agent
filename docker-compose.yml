@@ -1,28 +1,40 @@
 services:
   api:
-    image: amankhan1009/customer-support-agent-api:latest
     build:
       context: .
       dockerfile: Dockerfile
+
+    image: amankhan1009/customer-support-agent-api:latest
+
     ports:
       - "8000:8000"
+
     environment:
       GROQ_API_KEY: ${GROQ_API_KEY}
+      CHECKPOINTER_BACKEND: postgres
       DATABASE_PATH: /data/support_checkpoints.db
+      DATABASE_URL: ${DATABASE_URL}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
     volumes:
       - support_data:/data
 
   frontend:
-    image: amankhan1009/customer-support-agent-frontend:latest
     build:
       context: .
       dockerfile: Dockerfile.frontend
+
+    image: amankhan1009/customer-support-agent-frontend:latest
+
     ports:
       - "8501:8501"
+
     environment:
       API_URL: http://api:8000
+
     depends_on:
       - api
+
 
 volumes:
   support_data:
