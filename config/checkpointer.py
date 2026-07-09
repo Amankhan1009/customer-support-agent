@@ -2,6 +2,8 @@ import sqlite3
 
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.checkpoint.sqlite import SqliteSaver
+from psycopg.rows import dict_row
+from psycopg_pool import ConnectionPool
 
 from config.settings import (
     CHECKPOINTER_BACKEND,
@@ -28,16 +30,26 @@ def create_checkpointer():
                 "CHECKPOINTER_BACKEND=postgres."
             )
 
-        checkpointer_context = PostgresSaver.from_conn_string(
-            DATABASE_URL
+        pool = ConnectionPool(
+            conninfo=DATABASE_URL,
+            min_size=1,
+            max_size=5,
+            kwargs={
+                "autocommit": True,
+                "prepare_threshold": 0,
+                "row_factory": dict_row,
+            },
+            open=True,
         )
 
-        checkpointer = checkpointer_context.__enter__()
+        pool.wait()
+
+        checkpointer = PostgresSaver(pool)
 
         # Creates the required PostgreSQL checkpoint tables.
         checkpointer.setup()
 
-        return checkpointer, checkpointer_context
+        return checkpointer, pool
 
     raise ValueError(
         f"Unsupported CHECKPOINTER_BACKEND: "
@@ -46,9 +58,4 @@ def create_checkpointer():
 
 
 def close_checkpointer(resource):
-    if CHECKPOINTER_BACKEND == "sqlite":
-        resource.close()
-        return
-
-    if CHECKPOINTER_BACKEND == "postgres":
-        resource.__exit__(None, None, None)
+    resource.close()
