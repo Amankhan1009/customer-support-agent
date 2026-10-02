@@ -12,7 +12,7 @@ CLASSIFICATION_PROMPT = ChatPromptTemplate.from_messages(
             """
 You are an intent classifier for a customer support system.
 
-Classify the latest customer message into exactly one category:
+Classify the customer's intent into exactly one category:
 
 billing:
 Payment issues, charges, refunds, invoices, subscription charges,
@@ -31,12 +31,20 @@ Product features, pricing information, product information,
 or general questions about the service.
 
 unknown:
-Requests that do not belong to any supported category.
+Use ONLY when the topic genuinely does not belong to any supported
+category even after considering the full conversation history.
 
-Use previous conversation context only when the latest customer
-message is ambiguous or refers to an earlier issue.
+IMPORTANT — Multi-turn conversations:
+When the latest customer message is referential (for example, uses
+phrases like "back to", "the item I mentioned", "as I said before",
+"what about that", "following up on", "the return I mentioned earlier")
+or is asking about a previously discussed topic, you MUST classify
+it under the original intent of that referenced topic (e.g., if returning
+to an item return or refund, classify as "billing"), not as "general".
 
-Prioritize the latest customer message over older conversation history.
+Do NOT return "unknown" simply because the latest message is short,
+vague, or incomplete. Always use conversation history to resolve the
+ambiguity before returning "unknown".
 
 Return only the structured classification result.
 """,

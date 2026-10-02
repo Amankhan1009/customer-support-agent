@@ -78,6 +78,9 @@ class SupportState(TypedDict, total=False):
     needs_llm_routing: bool
 
     billing_issue: BillingIssue
+    reference_id: str
+    return_id: str
+    order_id: str
 
     technical_issue: TechnicalIssue
     diagnostic_result: str

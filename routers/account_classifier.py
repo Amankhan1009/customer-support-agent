@@ -5,8 +5,13 @@ ACCOUNT_KEYWORDS: dict[AccountIssue, tuple[str, ...]] = {
     "suspicious_access": (
         "hacked",
         "someone accessed my account",
+        "someone logging into my account",
+        "someone logged into my account",
+        "without my permission",
+        "without permission",
         "unauthorized access",
         "suspicious login",
+        "unrecognized login",
         "account compromised",
     ),
     "account_deletion": (
@@ -15,12 +20,15 @@ ACCOUNT_KEYWORDS: dict[AccountIssue, tuple[str, ...]] = {
         "remove my account",
     ),
     "password_reset": (
-    "forgot password",
-    "forgot my password",
-    "reset password",
-    "reset my password",
-    "change password",
-    "change my password",
+        "forgot password",
+        "forgot my password",
+        "forgot my account password",
+        "reset password",
+        "reset my password",
+        "reset my account password",
+        "change password",
+        "change my password",
+        "reset it",
     ),
     "login_problem": (
         "cannot log in",
@@ -48,6 +56,12 @@ def classify_account_issue(state: SupportState) -> dict:
             return {
                 "account_issue": account_issue
             }
+
+    # Semantic pattern: password + action (forgot / reset / change)
+    if "password" in message and any(act in message for act in ("forgot", "reset", "change")):
+        return {
+            "account_issue": "password_reset"
+        }
 
     return {
         "account_issue": "other_account"

@@ -10,3 +10,5 @@ uvicorn
 streamlit
 requests
 psycopg[binary,pool]
+python-jose[cryptography]
+bcrypt

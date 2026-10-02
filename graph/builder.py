@@ -197,10 +197,14 @@ def build_graph(checkpointer=None):
     # Post-workflow routing
     # --------------------------------------------------
 
-    # Billing currently completes directly.
-    builder.add_edge(
+    # Billing workflow may finalize or escalate.
+    builder.add_conditional_edges(
         "billing_workflow",
-        "finalize_response",
+        route_after_support_workflow,
+        {
+            "finalize": "finalize_response",
+            "escalate": "human_support_workflow",
+        },
     )
 
     # Technical workflow may finalize or escalate.
