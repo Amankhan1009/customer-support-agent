@@ -79,6 +79,8 @@ Docker automatically selects the correct image variant for the host architecture
 
 ## High-Level Architecture
 
+![LangGraph Architecture](assets/langgraph_architecture.jpg)
+
 ```text
                               Customer
                                  |
