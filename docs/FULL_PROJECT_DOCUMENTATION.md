@@ -527,3 +527,4 @@ customer-support-agent/
 ├── Dockerfile.frontend             # Streamlit Docker image
 └── docker-compose.yml              # Local multi-container orchestration
 ```
+

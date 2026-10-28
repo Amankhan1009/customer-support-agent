@@ -45,6 +45,17 @@ linux/arm64
 
 Docker automatically selects the correct image variant for the host architecture.
 
+## Documentation Suite
+
+Comprehensive technical and operational documentation is available in the [`docs/`](./docs) directory:
+
+- 📖 **[Master Documentation (`docs/FULL_PROJECT_DOCUMENTATION.md`)](./docs/FULL_PROJECT_DOCUMENTATION.md)**: Exhaustive master reference covering business impact, architecture, workflows, HITL, testing, and interview presentation scripts.
+- 🏛️ **[System Architecture (`docs/ARCHITECTURE.md`)](./docs/ARCHITECTURE.md)**: Deep dive into the 3-tier architecture, LangGraph state machine, typed state schema, reducers, and dual PostgreSQL/SQLite checkpointer engine.
+- 🔀 **[Workflows & Subgraphs (`docs/WORKFLOWS.md`)](./docs/WORKFLOWS.md)**: Detailed breakdown of the Billing, Technical, Account, and General subgraphs, and multi-entity slot resolution.
+- 🧑‍💻 **[Human-in-the-Loop Guide (`docs/HUMAN_IN_THE_LOOP.md`)](./docs/HUMAN_IN_THE_LOOP.md)**: Complete guide to native LangGraph `interrupt()` execution, snapshot persistence across server restarts, and supervisor resumption.
+- 🔌 **[API Reference (`docs/API_REFERENCE.md`)](./docs/API_REFERENCE.md)**: Full REST API specification, JWT authentication, request/response JSON schemas, and status codes.
+- 🚢 **[Deployment & DevOps (`docs/DEPLOYMENT_AND_DEVOPS.md`)](./docs/DEPLOYMENT_AND_DEVOPS.md)**: Multi-platform Docker, GitHub Actions CI/CD, Render cloud deployment, Neon DB, and cold-start resilience.
+
 ## Features
 
 - Natural-language customer support queries
