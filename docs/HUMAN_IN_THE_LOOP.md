@@ -162,3 +162,4 @@ A critical feature of this architecture is its resilience to infrastructure rest
 1. **Simulated Server Crash**: Suppose a ticket is interrupted waiting for review. The Render backend instance spins down or is restarted during deployment.
 2. **Zero In-Memory Dependency**: All state lives in the PostgreSQL Neon database.
 3. **Seamless Resumption After Reboot**: When the supervisor approves the ticket minutes or days later, the newly started FastAPI instance connects to PostgreSQL, loads the saved checkpoint via `thread_id`, and resumes execution with zero data loss.
+

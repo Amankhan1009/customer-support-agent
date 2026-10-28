@@ -242,3 +242,4 @@ Content-Type: application/json
 #### Error Responses
 - `404 Not Found`: Conversation thread not found.
 - `409 Conflict`: The conversation is not waiting for human review.
+

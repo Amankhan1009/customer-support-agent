@@ -185,3 +185,4 @@ The General subgraph handles high-volume informational questions without requiri
 - **`pricing_question`**: Provides detailed breakdowns of pricing tiers (Free, Pro, Enterprise), monthly vs. annual billing, and seat quotas.
 - **`product_question`**: Answers questions about business operating hours (e.g., Sunday customer support availability), browser compatibility, and product features.
 - **`other_general`**: Serves as a friendly informational catch-all for greetings and company background.
+

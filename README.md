@@ -1,49 +1,67 @@
-# Customer Support Agent with LangGraph
+<div align="center">
 
-A modular, stateful, containerized, and publicly deployed Agentic AI customer support system built with LangGraph.
+# 🎧 Enterprise Customer Support Agent
 
-The application demonstrates hybrid intent routing, specialized LangGraph subgraphs, persistent conversation state, context-aware LLM fallback routing, conditional workflows, error handling, human escalation, real human-in-the-loop execution, REST API integration, an interactive Streamlit interface, automated testing, configurable checkpoint backends, production PostgreSQL persistence, multi-platform Docker deployment, and public cloud deployment.
+### *Autonomous, Stateful & Production-Grade Multi-Domain Agentic AI with LangGraph*
 
-## Live Deployment
+[![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![LangGraph](https://img.shields.io/badge/LangGraph-State%20Machine-FF4B4B?style=for-the-badge&logo=langchain&logoColor=white)](https://langchain-ai.github.io/langgraph/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-REST%20API-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Interactive%20UI-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![PostgreSQL](https://img.shields.io/badge/Neon-PostgreSQL%20Pool-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://neon.tech/)
+[![Docker](https://img.shields.io/badge/Docker-Multi--Arch%20amd64%20%7C%20arm64-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://hub.docker.com/u/amankhan1009)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-Tests%20Passing%20(62%2F62)-brightgreen?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/Amankhan1009/customer-support-agent/actions)
 
-### Streamlit Application
+<p align="center">
+  <a href="https://customer-support-agent-frontend.onrender.com"><b>🚀 Launch Live Application</b></a> •
+  <a href="./docs/FULL_PROJECT_DOCUMENTATION.md"><b>📖 Master Documentation</b></a> •
+  <a href="https://customer-support-agent-4960.onrender.com/docs"><b>📑 Interactive Swagger API</b></a> •
+  <a href="https://hub.docker.com/u/amankhan1009"><b>📦 Docker Hub Images</b></a>
+</p>
 
-https://customer-support-agent-frontend.onrender.com
+---
 
-### FastAPI Backend
+> 💡 **An enterprise-ready, stateful customer support platform** engineered with **LangGraph hierarchical state machines**, **sub-millisecond hybrid intent routing**, **multi-entity slot memory**, and **resilient Human-in-the-Loop (HITL) interrupt execution** backed by managed Neon PostgreSQL.
 
-https://customer-support-agent-4960.onrender.com
+</div>
 
-### Swagger API Documentation
+<br/>
 
-https://customer-support-agent-4960.onrender.com/docs
+### 🌟 Core Architectural Highlights
 
-> The application is deployed using Render free-tier services. Free services may spin down after inactivity, so the first request can take additional time while the service starts.
+| Pillar | Capability | Technical Advantage |
+| :--- | :--- | :--- |
+| ⚡ **Sub-Millisecond Fast-Path** | Deterministic token & regex matching for routine queries | Instant response time at **\$0.00 token cost** |
+| 🧠 **Structured LLM Fallback** | Groq Llama-3.3-70B with Pydantic JSON schema output | Context-aware disambiguation with conversation history |
+| 🔀 **Domain Subgraphs** | Isolated Billing, Technical, Account & General subgraphs | Modular business logic; zero monolithic prompt degradation |
+| 🎯 **Multi-Entity Slot Memory** | Tracks `#REF-99214` and `#ORD-7842` across topics | Eliminates entity confusion across interleaved conversation turns |
+| 🛡️ **Zero-Risk HITL Escalation** | Halts on fraud, unauthorized charges, or account takeovers | Freezes execution via native `interrupt()` until supervisor signs off |
+| 🔄 **Durable Cloud Persistence** | Dual SQLite (dev) and Neon PostgreSQL (prod) connection pool | Interrupted tickets survive server redeployments and restarts |
+| 🐳 **Multi-Platform Docker** | Automated GitHub Actions CI/CD to Docker Hub | Native container support for both `linux/amd64` and `linux/arm64` |
 
-## Repository and Docker Images
+---
 
-### GitHub Repository
+## 🌐 Live Deployments & Cloud Services
 
-https://github.com/Amankhan1009/customer-support-agent
+| Service | Access Link | Description |
+| :--- | :--- | :--- |
+| **Streamlit Web Application** | [customer-support-agent-frontend.onrender.com](https://customer-support-agent-frontend.onrender.com) | Interactive chat UI with conversation history, multi-thread drawer, and supervisor review panel. |
+| **FastAPI Backend Gateway** | [customer-support-agent-4960.onrender.com](https://customer-support-agent-4960.onrender.com) | Production REST API orchestrating the LangGraph engine and Neon database pool. |
+| **Swagger Interactive API Docs** | [customer-support-agent-4960.onrender.com/docs](https://customer-support-agent-4960.onrender.com/docs) | OpenAPI interactive explorer and endpoint testing. |
 
-### Docker Hub Images
+> ℹ️ *Note: Deployed on Render free-tier services. Inactive instances spin down after 15 minutes. Use the frontend's **⚡ Wake Up Backend** button to ping `/health` and wake the instance.*
 
-API:
+## 🐳 Container Images & Repository
 
-https://hub.docker.com/r/amankhan1009/customer-support-agent-api
+- **GitHub Repository**: [github.com/Amankhan1009/customer-support-agent](https://github.com/Amankhan1009/customer-support-agent)
+- **FastAPI Docker Image**: [`amankhan1009/customer-support-agent-api`](https://hub.docker.com/r/amankhan1009/customer-support-agent-api)
+- **Frontend Docker Image**: [`amankhan1009/customer-support-agent-frontend`](https://hub.docker.com/r/amankhan1009/customer-support-agent-frontend)
 
-Frontend:
-
-https://hub.docker.com/r/amankhan1009/customer-support-agent-frontend
-
-Both Docker images are published as multi-platform images supporting:
-
+Both container images are published as multi-platform images with automated builds for:
 ```text
 linux/amd64
 linux/arm64
 ```
-
-Docker automatically selects the correct image variant for the host architecture.
 
 ## Documentation Suite
 

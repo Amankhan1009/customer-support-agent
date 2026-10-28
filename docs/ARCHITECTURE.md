@@ -205,3 +205,4 @@ sequenceDiagram
 
 1. **Authentication**: Implemented with salted `bcrypt` password hashing (`bcrypt.hashpw`) and signed JSON Web Tokens (`python-jose`) using `HS256`.
 2. **Tenant Isolation**: Conversations are identified by `thread_id`. The backend enforces that users can only query, list, or resume threads registered to their authenticated username in the `user_threads` database table.
+

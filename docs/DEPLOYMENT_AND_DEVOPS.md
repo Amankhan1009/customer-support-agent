@@ -118,3 +118,4 @@ To provide an optimal user experience:
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `60` | No | Lifespan of JWT access tokens in minutes. |
 | `API_URL` | `http://127.0.0.1:8000` | **Yes** (frontend) | URL pointing from Streamlit frontend to the FastAPI backend. |
 | `LOG_LEVEL` | `INFO` | No | Logging verbosity (`DEBUG`, `INFO`, `WARNING`, `ERROR`). |
+
