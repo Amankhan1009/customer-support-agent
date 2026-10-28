@@ -42,7 +42,29 @@ def initialize_session_state() -> None:
         st.session_state.backend_status = "unknown"
 
 
-# ── Backend Wake-up helper ────────────────────────────────────────────────────
+# ── Backend Wake-up & Status helper ───────────────────────────────────────────
+
+def render_status_badge() -> None:
+    b_status = st.session_state.get("backend_status", "unknown")
+    if b_status == "online":
+        st.success("🟢 Backend Online", icon="✅")
+    elif b_status == "offline":
+        st.error("🔴 Server Sleeping", icon="⚠️")
+    else:
+        st.info("⚪ Status Unknown", icon="ℹ️")
+
+
+def check_initial_backend_status(api_url: str) -> None:
+    if st.session_state.get("backend_status") == "unknown":
+        try:
+            r = requests.get(f"{api_url}/health", timeout=2.5)
+            if r.status_code == 200:
+                st.session_state.backend_status = "online"
+            else:
+                st.session_state.backend_status = "offline"
+        except requests.RequestException:
+            st.session_state.backend_status = "offline"
+
 
 def wake_up_backend(api_url: str) -> bool:
     with st.spinner("⏳ Waking up backend on Render... Free tier instances take ~30–50s to start from sleep."):
@@ -50,20 +72,20 @@ def wake_up_backend(api_url: str) -> bool:
             response = requests.get(f"{api_url}/health", timeout=65)
             if response.status_code == 200:
                 st.session_state.backend_status = "online"
+                st.session_state.wake_status_msg = ("success", "✅ Backend is awake and responsive! You can now log in or continue chatting.")
                 st.toast("Backend is awake and ready!", icon="🟢")
-                st.success("✅ Backend is awake and responsive! You can now log in or continue chatting.")
                 return True
             else:
                 st.session_state.backend_status = "offline"
-                st.error(f"⚠️ Backend returned HTTP {response.status_code}. Please retry in a moment.")
+                st.session_state.wake_status_msg = ("error", f"⚠️ Backend returned HTTP {response.status_code}. Please retry in a moment.")
                 return False
         except requests.Timeout:
             st.session_state.backend_status = "offline"
-            st.error("⏳ Wake-up timed out (>60s). Render may still be spinning up. Please wait 10-15 seconds and try again.")
+            st.session_state.wake_status_msg = ("error", "⏳ Wake-up timed out (>60s). Render may still be spinning up. Please wait 10-15 seconds and try again.")
             return False
         except requests.RequestException as e:
             st.session_state.backend_status = "offline"
-            st.error(f"❌ Could not reach backend: {e}. Please check the API URL or wait for Render to finish starting.")
+            st.session_state.wake_status_msg = ("error", f"❌ Could not reach backend: {e}. Please check the API URL or wait for Render to finish starting.")
             return False
 
 
@@ -239,14 +261,17 @@ def show_login_page(api_url: str) -> None:
         with col_btn:
             if st.button("⚡ Wake Up Backend", key="login_wake_btn", use_container_width=True):
                 wake_up_backend(api_url)
+                st.rerun()
         with col_stat:
-            b_status = st.session_state.get("backend_status", "unknown")
-            if b_status == "online":
-                st.success("🟢 Backend Online", icon="✅")
-            elif b_status == "offline":
-                st.error("🔴 Server Sleeping", icon="⚠️")
+            render_status_badge()
+
+        if st.session_state.get("wake_status_msg"):
+            msg_type, msg_text = st.session_state.wake_status_msg
+            if msg_type == "success":
+                st.success(msg_text)
             else:
-                st.info("⚪ Status Unknown", icon="ℹ️")
+                st.error(msg_text)
+            st.session_state.wake_status_msg = None
 
     st.markdown("")
 
@@ -300,18 +325,15 @@ with st.sidebar:
         value=DEFAULT_API_URL,
     )
 
+    check_initial_backend_status(api_url)
+
     st.divider()
     st.caption("SERVER STATUS")
-    b_status = st.session_state.get("backend_status", "unknown")
-    if b_status == "online":
-        st.success("🟢 Backend Online", icon="✅")
-    elif b_status == "offline":
-        st.error("🔴 Server Sleeping", icon="⚠️")
-    else:
-        st.info("⚪ Status Unknown", icon="ℹ️")
+    render_status_badge()
 
     if st.button("⚡ Wake Up Backend", key="sidebar_wake_btn", use_container_width=True, help="Pings Render backend to wake it from sleep"):
         wake_up_backend(api_url)
+        st.rerun()
 
     st.caption("Render free tier sleeps after 15m of inactivity. Waking up takes ~30–50s.")
 
